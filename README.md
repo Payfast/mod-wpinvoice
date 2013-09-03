@@ -1,4 +1,4 @@
-PayFast WP-invoice Payment Plugin v1.0.1 for WP-Invoice v3.08.7
+PayFast WP-invoice Payment Plugin v1.0.2 for WP-Invoice v3.08.7
 ------------------------------------------------------------------------------
 Copyright (c) 2010-2013 PayFast (Pty) Ltd
 
