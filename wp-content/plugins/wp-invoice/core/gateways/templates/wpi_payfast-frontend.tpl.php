@@ -20,7 +20,6 @@
  * @copyright  2009-2013 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
 */
- */
 
 include_once WPI_Path.'/core/wpi_template_functions.php'; 
 if($invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'])
@@ -60,12 +59,12 @@ $formData['signature'] = md5($sigString);
   <input type='hidden' value="<?php echo $invoice['invoice_id'];?>" name="invoice_id">
   <?php do_action('wpi_payment_fields_payfast', $invoice); ?>
 </form>
-<form id='payfast_payment' action="https://<?php echo $url; ?>.local/eng/process" method="post" class="wpi_checkout <?php print $this->type; ?> clearfix">
+<form id='payfast_payment' action="https://<?php echo $url; ?>.co.za/eng/process" method="post" class="wpi_checkout <?php print $this->type; ?> clearfix">
 <?php 
 foreach($formData as $k=>$v)
 {
 echo "    <input id='$k' type='hidden' name='$k' value='$v'>";
 }
-?>	
+?>  
     <input id='process_payment' type="submit" value="<?php _e('Pay Now With PayFast ', WPI); ?>">          
 </form>
