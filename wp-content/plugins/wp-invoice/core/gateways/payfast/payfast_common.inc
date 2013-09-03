@@ -25,7 +25,7 @@
 define( 'PF_SOFTWARE_NAME', 'WPInvoice' );
 define( 'PF_MODULE_NAME', 'PayFast-WpInvoice' );
 define( 'PF_MODULE_VER', '1.00' );
-define( 'PD_DEBUG' , $invoice->data['billing']['wpi_payfast']['settings']['payfast_debug_mode']['value']);
+define( 'PF_DEBUG' , $invoice->data['billing']['wpi_payfast']['settings']['payfast_debug_mode']['value']);
 
 // Features
 // - PHP
@@ -91,7 +91,7 @@ function pflog( $msg = '', $close = false )
     global $module;
 
     // Only log if debugging is enabled
-    if( PF_DEBUG )
+    if( PF_DEBUG == 'true' )
     {
         if( $close )
         {

@@ -22,7 +22,7 @@
 */
 
 include_once WPI_Path.'/core/wpi_template_functions.php'; 
-if($invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'])
+if($invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'] == 'true')
 {
   $url = 'sandbox.payfast';
   $merchant_id = '10000100';

@@ -343,7 +343,8 @@ class wpi_payfast extends wpi_gateway_base {
    * @since   1.0.0  
    *
    */
-  function server_callback(){
+  function server_callback()
+  {
     
     if ( empty( $_POST ) ) die(__('Direct access not allowed', WPI));    
 
@@ -440,12 +441,14 @@ class wpi_payfast extends wpi_gateway_base {
     }
 
     /** Verify callback request */
-    if ( !$pfError && !$pfDone ) {
+    if ( !$pfError && !$pfDone )
+    {
 
-          pflog( 'Check status and update order' );
-      
-          /** PayFast Cart. Used for SPC */
-          switch( $pfData['payment_status'] ) {
+        pflog( 'Check status and update order' );
+
+        /** PayFast Cart. Used for SPC */
+        switch( $pfData['payment_status'] ) 
+        {
             case 'PENDING':
               /** Mark invoice as Pending */
               wp_invoice_mark_as_pending( $pfData['m_payment_id'] );
@@ -471,15 +474,7 @@ class wpi_payfast extends wpi_gateway_base {
 
             default: break;
 
-          }
-       
-
-       
-
+        }
     }
-
-  }
-
-  
-
+    }
 }
