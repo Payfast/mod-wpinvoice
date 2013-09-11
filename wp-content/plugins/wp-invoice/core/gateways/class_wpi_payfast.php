@@ -366,7 +366,7 @@ class wpi_payfast extends wpi_gateway_base
     $pfErrMsg = '';
     $pfDone = false;
     $pfData = array();
-    $pfHost = ( ( $invoice->data['billing']['wpi_payfast']['settings']['test_mode']['value'] ) ? 'www' : 'sandbox' ) . '.payfast.local';
+    $pfHost = ( ( $invoice->data['billing']['wpi_payfast']['settings']['test_mode']['value'] == 'true' ) ? 'www' : 'sandbox' ) . '.payfast.co.za';
     $pfOrderId = '';
     $pfParamString = '';
 
