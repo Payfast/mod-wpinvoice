@@ -255,7 +255,7 @@ class wpi_payfast extends wpi_gateway_base
           // For each field
           foreach( $value as $field_slug => $field_data ) {
 
-            // If field is set of 3 fields for paypal phone number
+            // If field is set of 3 fields for payfast phone number
             if ( $field_slug == 'phonenumber' ) {
 
               echo '<li class="wpi_checkout_row"><div class="control-group"><label class="control-label">'.__('Phone Number', WPI).'</label><div class="controls">';
@@ -457,7 +457,7 @@ class wpi_payfast extends wpi_gateway_base
 
           pflog( 'Check status and update order' );
       
-          /** PayPal Cart. Used for SPC */
+          /** PayFast Cart. Used for SPC */
           switch( $pfData['payment_status'] ) 
           {
             case 'PENDING':
@@ -467,14 +467,14 @@ class wpi_payfast extends wpi_gateway_base
               break;
             case 'COMPLETE':
               /** Add payment amount */
-              $event_note = sprintf(__('%s paid via PayPal', WPI), WPI_Functions::currency_format(abs($pfData['amount_gross']), $pfData['m_payment_id']));
+              $event_note = sprintf(__('%s paid via PayFast', WPI), WPI_Functions::currency_format(abs($pfData['amount_gross']), $pfData['m_payment_id']));
               
               $event_amount = (float)$pfData['amount_gross'];
               $event_type   = 'add_payment';
               /** Log balance changes */
               $invoice->add_entry("attribute=balance&note=$event_note&amount=$event_amount&type=$event_type");
               /** Log payer email */
-              $payer_email = sprintf(__("PayPal Payer email: %s", WPI), $pfData['email_address']);
+              $payer_email = sprintf(__("PayFast Payer email: %s", WPI), $pfData['email_address']);
               $invoice->add_entry("attribute=invoice&note=$payer_email&type=update");
               $invoice->save_invoice();
               /** ... and mark invoice as paid */
