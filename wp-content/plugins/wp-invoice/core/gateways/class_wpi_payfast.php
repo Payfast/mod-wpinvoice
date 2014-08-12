@@ -185,7 +185,7 @@ class wpi_payfast extends wpi_gateway_base
    * @global type $invoice
    * @global type $wpi_settings
    */
-  function process_payment() 
+  static function process_payment() 
   {
      global $invoice;
 
