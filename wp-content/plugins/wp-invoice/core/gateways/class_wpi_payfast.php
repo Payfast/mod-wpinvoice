@@ -173,21 +173,9 @@ class wpi_payfast extends wpi_gateway_base
      */
     function recurring_settings( $this_invoice ) 
     {
-       ?>
+      ?>
       <h4><?php _e( 'PayFast Payments', WPI ); ?></h4>
-      <table class="wpi_recurring_bill_settings">
-        <tr>
-          <th><?php _e( 'Bill Every', WPI ); ?></th>
-          <td>
-            <?php echo WPI_UI::input("name=wpi_invoice[recurring][".$this->type."][length]&value=" . (!empty($this_invoice['recurring'][$this->type]) ? $this_invoice['recurring'][$this->type]['length'] : '') . "&class=wpi_small wpi_bill_every_length"); ?>
-            <?php echo WPI_UI::select("name=wpi_invoice[recurring][".$this->type."][unit]&values=" . serialize(array( "days" => __("Day(s)", WPI), "weeks" => __("Week(s)", WPI), "months" => __("Month(s)", WPI), "years" => __("Year(s)", WPI) )) . "&current_value=" . (!empty($this_invoice['recurring'][$this->type]) ? $this_invoice['recurring'][$this->type]['unit'] : '')); ?>
-          </td>
-        </tr>
-        <tr>
-          <th><?php _e( 'Billing Cycles', WPI ); ?></th>
-          <td><?php echo WPI_UI::input("id=wpi_meta_recuring_cycles&name=wpi_invoice[recurring][".$this->type."][cycles]&value=" . (!empty($this_invoice['recurring'][$this->type]) ? $this_invoice['recurring'][$this->type]['cycles'] : '') . "&class=wpi_small"); ?></td>
-        </tr>
-      </table>
+      <p><?php _e( 'Currently PayFast gateway does not support Recurring Billing', WPI ); ?></p>
       <?php
     }
 
