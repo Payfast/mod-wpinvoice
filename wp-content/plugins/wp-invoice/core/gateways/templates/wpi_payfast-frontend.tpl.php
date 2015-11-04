@@ -54,6 +54,7 @@ foreach($formData as $k=>$v)
 }
 $sigString = substr($sigString, 0,-1);
 $formData['signature'] = md5($sigString);
+$formData['user_agent'] = 'WPInvoice 3.x';
 ?>
 <form id="process_payment_form" class="wpi_checkout online_payment_form <?php print $this->type; ?> clearfix">
   <input type='hidden' value="<?php echo $invoice['invoice_id'];?>" name="invoice_id">
