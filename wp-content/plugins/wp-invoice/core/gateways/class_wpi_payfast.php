@@ -57,6 +57,10 @@ class wpi_payfast extends wpi_gateway_base
         'label' => "PayFast Merchant Key",
         'value' => ''
       ),
+      'payfast_passphrase' => array(
+      'label' => "PayFast Passphrase",
+      'value' => ''
+      ),
       'payfast_test_mode' => array(
         'label' => "Use in Test Mode",
         'description' => "Use PayFast SandBox for test mode",
@@ -167,17 +171,28 @@ class wpi_payfast extends wpi_gateway_base
     $this->options['settings']['itn']['value'] = admin_url('admin-ajax.php?action=wpi_gateway_server_callback&type=wpi_payfast');
   }
 
-  /**
-     *
-     * @param type $this_invoice
-     */
-    function recurring_settings( $this_invoice ) 
-    {
-      ?>
-      <h4><?php _e( 'PayFast Payments', WPI ); ?></h4>
-      <p><?php _e( 'Currently PayFast gateway does not support Recurring Billing', WPI ); ?></p>
-      <?php
-    }
+   /**
+   *
+   * @param type $this_invoice
+   */
+  function recurring_settings($this_invoice) {
+    ?>
+    <h4><?php _e('PayFast Subscriptions', ud_get_wp_invoice()->domain); ?></h4>
+    <table class="wpi_recurring_bill_settings">
+      <tr>
+        <th><?php _e('Billing Frequency', ud_get_wp_invoice()->domain); ?></th>
+        <td>
+    <?php echo WPI_UI::select("name=wpi_invoice[recurring][".$this->type."][interval]&values=" . serialize(apply_filters('wpi_payfast_interval', array("3" => __("Monthly", ud_get_wp_invoice()->domain), "4" => __("Quarterly", ud_get_wp_invoice()->domain), "5" => __("Biannual", ud_get_wp_invoice()->domain), "6" => __("Annual", ud_get_wp_invoice()->domain)))) . "&current_value=" . (!empty($this_invoice['recurring'][$this->type]) ? $this_invoice['recurring'][$this->type]['interval'] : '')); ?>
+        </td>
+      </tr>
+      <tr>
+        <th><?php _e('Billing Cycles (set to 0 for infinite cycles)', ud_get_wp_invoice()->domain); ?></th>
+        <td><?php echo WPI_UI::input("id=wpi_meta_recuring_cycles&name=wpi_invoice[recurring][" . $this->type . "][cycles]&value=" . (!empty($this_invoice['recurring'][$this->type]) ? $this_invoice['recurring'][$this->type]['cycles'] : '') . "&class=wpi_small"); ?></td>
+      </tr>
+    </table>
+    <?php
+  }
+
 
   /**
    * Overrided payment process for payfast
@@ -185,7 +200,7 @@ class wpi_payfast extends wpi_gateway_base
    * @global type $invoice
    * @global type $wpi_settings
    */
-  static function process_payment() 
+  static function process_payment()
   {
      global $invoice;
 
@@ -193,13 +208,13 @@ class wpi_payfast extends wpi_gateway_base
     $wp_users_id = $invoice['user_data']['ID'];
 
     $invoice = new WPI_Invoice();
-    $invoice->load_invoice("id={$_POST['invoice_id']}"); 
+    $invoice->load_invoice("id={$_POST['invoice_id']}");
 
     $crm_data    = $_REQUEST['crm_data'];
     $invoice_id  = $invoice->data['invoice_id'];
     $wp_users_id = $invoice->data['user_data']['ID'];
     $post_id     = wpi_invoice_id_to_post_id($invoice_id);
-    
+
     // update user data
     update_user_meta($wp_users_id, 'last_name', $_REQUEST['last_name']);
     update_user_meta($wp_users_id, 'first_name', $_REQUEST['first_name']);
@@ -216,7 +231,7 @@ class wpi_payfast extends wpi_gateway_base
 
   }
 
-  
+
   /**
    * wpi_payment_fields
    *
@@ -227,11 +242,11 @@ class wpi_payfast extends wpi_gateway_base
    * @access  public
    *
    * @author  Ron    Darby    ron.darby@payfast.co.za
-   * @since   1.0.0 
+   * @since   1.0.0
    *
    * @param array $invoice
    */
-  function wpi_payment_fields( $invoice ) 
+  function wpi_payment_fields( $invoice )
   {
 
     $this->front_end_fields = apply_filters( 'wpi_crm_custom_fields', $this->front_end_fields, 'crm_data' );
@@ -348,24 +363,26 @@ class wpi_payfast extends wpi_gateway_base
    * @access  public
    *
    * @author  Ron    Darby    ron.darby@payfast.co.za
-   * @since   1.0.0  
+   * @since   1.0.0
    * @author  Ron    Darby    ron.darby@payfast.co.za
-   * @since   1.0.1 
+   * @since   1.0.1
    *
    */
   static function server_callback()
   {
-    
-    if ( empty( $_POST ) ) die(__('Direct access not allowed', WPI));    
+
+    if ( empty( $_POST ) ) die(__('Direct access not allowed', WPI));
+
+    $invId = empty( $_POST['m_payment_id'] ) ? $_POST['m_payment_id'] : $_POST['m_payment_id'];
 
     $invoice = new WPI_Invoice();
-    $invoice->load_invoice("id={$_POST['m_payment_id']}");   
+    $invoice->load_invoice("id={$invId}");
 
     $pfError = false;
     $pfErrMsg = '';
     $pfDone = false;
     $pfData = array();
-    $pfHost = ( ( $invoice->data['billing']['wpi_payfast']['settings']['test_mode']['value'] == 'true' ) ? 'www' : 'sandbox' ) . '.payfast.co.za';
+    $pfHost = ( ( $invoice->data['billing']['wpi_payfast']['settings']['test_mode']['value'] == 'true' ) ? 'sandbox' : 'www' ) . '.payfast.co.za';
     $pfOrderId = '';
     $pfParamString = '';
 
@@ -379,12 +396,12 @@ class wpi_payfast extends wpi_gateway_base
     if( !$pfError && !$pfDone )
     {
         pflog( 'Get posted data' );
-    
+
         // Posted variables from ITN
         $pfData = pfGetData();
-    
+
         pflog( 'PayFast Data: '. print_r( $pfData, true ) );
-    
+
         if( $pfData === false )
         {
             $pfError = true;
@@ -396,9 +413,12 @@ class wpi_payfast extends wpi_gateway_base
     if( !$pfError && !$pfDone )
     {
         pflog( 'Verify security signature' );
-    
+
+        $passPhrase = $invoice->data['billing']['wpi_payfast']['settings']['payfast_passphrase']['value'];
+        $pfPassPhrase = empty( $passPhrase ) ? null : $passPhrase;
+
         // If signature different, log for debugging
-        if( !pfValidSignature( $pfData, $pfParamString ) )
+        if( !pfValidSignature( $pfData, $pfParamString, $pfPassPhrase ) )
         {
             $pfError = true;
             $pfErrMsg = PF_ERR_INVALID_SIGNATURE;
@@ -409,7 +429,7 @@ class wpi_payfast extends wpi_gateway_base
     if( !$pfError && !$pfDone && !PF_DEBUG )
     {
         pflog( 'Verify source IP' );
-    
+
         if( !pfValidIP( $_SERVER['REMOTE_ADDR'] ) )
         {
             $pfError = true;
@@ -427,16 +447,16 @@ class wpi_payfast extends wpi_gateway_base
     if( !$pfError )
     {
         pflog( 'Verify data received' );
-    
+
         $pfValid = pfValidData( $pfHost, $pfParamString );
-    
+
         if( !$pfValid )
         {
             $pfError = true;
             $pfErrMsg = PF_ERR_BAD_ACCESS;
         }
     }
-        
+
     //// Check data against internal order
     if( !$pfError && !$pfDone )
     {
@@ -447,11 +467,76 @@ class wpi_payfast extends wpi_gateway_base
         {
             $pfError = true;
             $pfErrMsg = PF_ERR_AMOUNT_MISMATCH;
-        }       
+        }
+    }
+
+    if( $pfError )
+        {
+            pflog( 'Error occurred: '. $pfErrMsg );
+        }
+
+    if ( !empty( $pfData['token'] && !$pfError ) )
+    {
+        if ( $pfData['payment_status'] == 'COMPLETE' && strtotime( $pfData['custom_str1'] ) <= strtotime( gmdate( 'Y-m-d' ). '+ 2 days' ) )
+        {
+              /** PayFast Subscription created */
+              $event_note = sprintf(__('%s paid via PayFast to initiate subscription: ' . $pfData['item_name'], WPI), WPI_Functions::currency_format(abs($pfData['amount_gross']), $pfData['m_payment_id']));
+
+              $event_amount = (float)$pfData['amount_gross'];
+              $event_type   = 'add_payment';
+              /** Log balance changes */
+              $invoice->add_entry("attribute=balance&note=$event_note&amount=$event_amount&type=$event_type");
+              /** Log payer email */
+              $payer_email = sprintf(__("PayFast Payer email: %s", WPI), $pfData['email_address']);
+              $invoice->add_entry("attribute=invoice&note=$payer_email&type=update");
+              $invoice->save_invoice();
+              /** ... and mark invoice as paid */
+              wp_invoice_mark_as_paid( $pfData['m_payment_id'], $check = true );
+              send_notification( $invoice->data );
+              do_action( 'wpi_payfast_subscr_signup_ipn', $_POST );
+            pflog( 'Subscription created: ' . $pfData['m_payment_id'] );
+        }
+
+        if ( $pfData['payment_status'] == 'COMPLETE' && strtotime( gmdate( 'Y-m-d' ) ) > strtotime( $pfData['custom_str1'] . '+ 2 days' ) )
+        {
+              $event_note = sprintf(__('%s paid via PayFast for subscription: ' . $pfData['item_name'], WPI), WPI_Functions::currency_format(abs($pfData['amount_gross']), $pfData['m_payment_id']));
+
+              $event_amount = (float)$pfData['amount_gross'];
+              $event_type   = 'add_payment';
+
+              /** Log balance changes */
+              $invoice->add_entry("attribute=balance&note=$event_note&amount=$event_amount&type=$event_type");
+
+              /** Log payer email */
+              $payer_email = sprintf(__("PayFast Payer email: %s", WPI), $pfData['email_address']);
+              $invoice->add_entry("attribute=invoice&note=$payer_email&type=update");
+              $invoice->save_invoice();
+
+              /** ... and mark invoice as paid */
+              wp_invoice_mark_as_paid( $pfData['m_payment_id'], $check = true );
+              send_notification( $invoice->data );
+
+             do_action('wpi_payfast_subscr_payment_ipn', $_POST);
+             pflog( 'Recurring Payment (m_payment_id): ' . $pfData['m_payment_id'] );
+        }
+
+        if ( $pfData['payment_status'] == 'CANCELLED' )
+        {
+            /** PayFast Subscription cancelled */
+            $event_note = 'Subscription Cancelled'; /*sprintf(__('Subscription cancelled', WPI), WPI_Functions::currency_format(abs($pfData['m_payment_id']), $pfData['m_payment_id']));*/
+            $event_amount = '0.00';
+            $event_type   = 'add_payment';
+            /** Log balance changes */
+            $invoice->add_entry("attribute=balance&note=$event_note&amount=$event_amount&type=$event_type");
+            $invoice->save_invoice();
+            WPI_Functions::log_event(wpi_invoice_id_to_post_id($pfData['m_payment_id']), 'invoice', 'update', '', __('PayFast Subscription cancelled', ud_get_wp_invoice()->domain));
+            do_action('wpi_payfast_subscr_cancel_ipn', $_POST);
+            pflog('subscription cancelled for id: ' . $pfData['m_payment_id']);
+        }
     }
 
     /** Verify callback request */
-    if ( !$pfError && !$pfDone ) 
+    if ( !$pfError && !$pfDone && empty($pfData['token'] ) )
     {
 
           pflog( 'Check status and update order' );
