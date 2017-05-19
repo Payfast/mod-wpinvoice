@@ -55,9 +55,9 @@ In order to make the module “LIVE”, follow the instructions below:
 9. Click Save
 
 ******************************************************************************
-*                                                                            *
-*    Please see the URL below for all information concerning this module:    *
-*                                                                            *
-*             https://www.payfast.co.za/shopping-carts/wp-invoice/           *
-*                                                                            *
+
+    Please see the URL below for all information concerning this module:
+
+             https://www.payfast.co.za/shopping-carts/wp-invoice/
+
 ******************************************************************************
