@@ -72,7 +72,7 @@ $formData['user_agent'] = 'WPInvoice 4.x';
     <input type='hidden' value="<?php echo $invoice['invoice_id'];?>" name="invoice_id">
     <?php do_action('wpi_payment_fields_payfast', $invoice); ?>
 </form>
-<form id='payfast_payment' action="https://<?php echo $url; ?>.local/eng/process" method="post" class="wpi_checkout <?php print $this->type; ?> clearfix">
+<form id='payfast_payment' action="https://<?php echo $url; ?>.co.za/eng/process" method="post" class="wpi_checkout <?php print $this->type; ?> clearfix">
     <?php
     foreach($formData as $k=>$v)
     {
