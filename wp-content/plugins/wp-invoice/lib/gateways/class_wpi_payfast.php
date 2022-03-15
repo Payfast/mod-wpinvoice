@@ -417,8 +417,7 @@ class wpi_payfast extends wpi_gateway_base
     }
 
     //// Verify data received
-    /// Skip if developer mode
-    if( !$pfError)
+    if( !$pfError )
     {
         pflog( 'Verify data received' );
 
