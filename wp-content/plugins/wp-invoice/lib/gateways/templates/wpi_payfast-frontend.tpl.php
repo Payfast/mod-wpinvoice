@@ -6,6 +6,8 @@
  */
 
 require_once( ud_get_wp_invoice()->path( "lib/class_template_functions.php", 'dir' ) );
+
+
 if( $invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'] == 'true' &&
     empty( $invoice['billing']['wpi_payfast']['settings']['payfast_merchantId']['value'] ) &&
     empty( $invoice['billing']['wpi_payfast']['settings']['payfast_merchantKey']['value'] ) )
@@ -19,7 +21,9 @@ else
     $merchant_key = $invoice['billing']['wpi_payfast']['settings']['payfast_merchantKey']['value'];
 }
 
-$url = $invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'] == 'true' ? 'sandbox.payfast' : 'www.payfast';
+$pfTestMode = $invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'];
+$pfHostPrefix = $pfTestMode == 'true' ? 'sandbox' : 'www';
+$url = $pfHostPrefix . '.payfast.co.za';
 
 $formData = array(
     'merchant_id'=>$merchant_id,
@@ -57,7 +61,10 @@ foreach( $formData as $key => $val )
 }
 $passPhrase = $invoice['billing']['wpi_payfast']['settings']['payfast_passphrase']['value'];
 
-if( empty( $passPhrase ) || $invoice['billing']['wpi_payfast']['settings']['payfast_test_mode']['value'] == 'true' )
+if( empty( $passPhrase ) ||
+    ($pfTestMode == 'true' &&
+        empty( $invoice['billing']['wpi_payfast']['settings']['payfast_merchantId']['value'] ) &&
+        empty( $invoice['billing']['wpi_payfast']['settings']['payfast_merchantKey']['value'] ) ) )
 {
     $pfOutput = substr( $pfOutput, 0, -1 );
 }
@@ -72,7 +79,7 @@ $formData['user_agent'] = 'WPInvoice 4.x';
     <input type='hidden' value="<?php echo $invoice['invoice_id'];?>" name="invoice_id">
     <?php do_action('wpi_payment_fields_payfast', $invoice); ?>
 </form>
-<form id='payfast_payment' action="https://<?php echo $url; ?>.co.za/eng/process" method="post" class="wpi_checkout <?php print $this->type; ?> clearfix">
+<form id='payfast_payment' action="https://<?php echo $url; ?>/eng/process" method="post" class="wpi_checkout <?php print $this->type; ?> clearfix">
     <?php
     foreach($formData as $k=>$v)
     {

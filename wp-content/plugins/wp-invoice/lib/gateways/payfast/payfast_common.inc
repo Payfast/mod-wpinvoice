@@ -8,7 +8,7 @@
 // User agent constituents (for cURL)
 define( 'PF_SOFTWARE_NAME', 'WPInvoice' );
 define( 'PF_MODULE_NAME', 'PayFast-WpInvoice' );
-define( 'PF_MODULE_VER', '1.00' );
+define( 'PF_MODULE_VER', '2.00' );
 define( 'PF_DEBUG' , $invoice->data['billing']['wpi_payfast']['settings']['payfast_debug_mode']['value']);
 
 // Features
@@ -104,7 +104,7 @@ function pflog( $msg = '', $close = false )
 // {{{ pfGetData
 /**
  * pfGetData
- *  
+ *
  * @author Jonathan Smit
  */
 function pfGetData()
@@ -126,7 +126,7 @@ function pfGetData()
 // {{{ pfValidSignature
 /**
  * pfValidSignature
- * 
+ *
  * @author Jonathan Smit
  */
 function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase=null )
@@ -169,7 +169,7 @@ function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase
  * pfValidData
  *
  * @author Jonathan Smit
- * @param $pfHost String Hostname to use 
+ * @param $pfHost String Hostname to use
  * @param $pfParamString String Parameter string to send
  * @param $proxy String Address of proxy to use or NULL if no proxy
  */
@@ -186,7 +186,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
 
         // Create default cURL object
         $ch = curl_init();
-    
+
         // Set cURL options - Use curl_setopt for freater PHP compatibility
         // Base settings
         curl_setopt( $ch, CURLOPT_USERAGENT, PF_USER_AGENT );  // Set user agent
@@ -194,7 +194,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
         curl_setopt( $ch, CURLOPT_HEADER, false );             // Don't include header in output
         curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        
+
         // Standard settings
         curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_POST, true );
@@ -202,7 +202,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
         curl_setopt( $ch, CURLOPT_TIMEOUT, PF_TIMEOUT );
         if( !empty( $pfProxy ) )
             curl_setopt( $ch, CURLOPT_PROXY, $proxy );
-    
+
         // Execute CURL
         $response = curl_exec( $ch );
         curl_close( $ch );
@@ -214,25 +214,25 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
         $header = '';
         $res = '';
         $headerDone = false;
-         
+
         // Construct Header
         $header = "POST /eng/query/validate HTTP/1.0\r\n";
         $header .= "Host: ". $pfHost ."\r\n";
         $header .= "User-Agent: ". PF_USER_AGENT ."\r\n";
         $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
         $header .= "Content-Length: " . strlen( $pfParamString ) . "\r\n\r\n";
- 
+
         // Connect to server
         $socket = fsockopen( 'ssl://'. $pfHost, 443, $errno, $errstr, PF_TIMEOUT );
- 
+
         // Send command to server
         fputs( $socket, $header . $pfParamString );
- 
+
         // Read the response from the server
         while( !feof( $socket ) )
         {
             $line = fgets( $socket, 1024 );
- 
+
             // Check if we are finished reading the header yet
             if( strcmp( $line, "\r\n" ) == 0 )
             {
@@ -246,7 +246,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
                 $response .= $line;
             }
         }
-        
+
     }
 
     pflog( "Response:\n". print_r( $response, true ) );
@@ -261,56 +261,19 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '', $pfPro
         return( false );
 }
 // }}}
-// {{{ pfValidIP
-/**
- * pfValidIP
- *
- * @author Jonathan Smit
- * @param $sourceIP String Source IP address 
- */
-function pfValidIP( $sourceIP )
-{
-    // Variable initialization
-    $validHosts = array(
-        'www.payfast.co.za',
-        'sandbox.payfast.co.za',
-        'w1w.payfast.co.za',
-        'w2w.payfast.co.za',
-        );
 
-    $validIps = array();
-
-    foreach( $validHosts as $pfHostname )
-    {
-        $ips = gethostbynamel( $pfHostname );
-
-        if( $ips !== false )
-            $validIps = array_merge( $validIps, $ips );
-    }
-
-    // Remove duplicates
-    $validIps = array_unique( $validIps );
-
-    pflog( "Valid IPs:\n". print_r( $validIps, true ) );
-
-    if( in_array( $sourceIP, $validIps ) )
-        return( true );
-    else
-        return( false );
-}
-// }}}
 // {{{ pfAmountsEqual
 /**
  * pfAmountsEqual
- * 
+ *
  * Checks to see whether the given amounts are equal using a proper floating
  * point comparison with an Epsilon which ensures that insignificant decimal
  * places are ignored in the comparison.
- * 
+ *
  * eg. 100.00 is equal to 100.0001
  *
  * @author Jonathan Smit
- * @param $amount1 Float 1st amount for comparison 
+ * @param $amount1 Float 1st amount for comparison
  * @param $amount2 Float 2nd amount for comparison
  */
 function pfAmountsEqual( $amount1, $amount2 )
