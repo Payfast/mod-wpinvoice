@@ -13,15 +13,15 @@ Description: Provides the PayFast for payment options
 */
 
 
-class wpi_payfast extends wpi_gateway_base 
+class wpi_payfast extends wpi_gateway_base
 {
   /**
    * Constructor
    */
-  
-  function __construct() 
+
+  function __construct()
   {
-    parent::__construct();    
+    parent::__construct();
 
     /**
    * Payment settings
@@ -361,12 +361,13 @@ class wpi_payfast extends wpi_gateway_base
 
     $invoice = new WPI_Invoice();
     $invoice->load_invoice("id={$invId}");
-
     $pfError = false;
     $pfErrMsg = '';
     $pfDone = false;
     $pfData = array();
-    $pfHost = ( ( $invoice->data['billing']['wpi_payfast']['settings']['test_mode']['value'] == 'true' ) ? 'sandbox' : 'www' ) . '.payfast.co.za';
+    $pfTestMode = $invoice->data['billing']['wpi_payfast']['settings']['test_mode']['value'];
+    $pfHostPrefix = $pfTestMode == 'true' ? 'sandbox' : 'www';
+    $pfHost = $pfHostPrefix . '.payfast.co.za';
     $pfOrderId = '';
     $pfParamString = '';
 
@@ -406,18 +407,6 @@ class wpi_payfast extends wpi_gateway_base
         {
             $pfError = true;
             $pfErrMsg = PF_ERR_INVALID_SIGNATURE;
-        }
-    }
-
-    //// Verify source IP (If not in debug mode)
-    if( !$pfError && !$pfDone && !PF_DEBUG )
-    {
-        pflog( 'Verify source IP' );
-
-        if( !pfValidIP( $_SERVER['REMOTE_ADDR'] ) )
-        {
-            $pfError = true;
-            $pfErrMsg = PF_ERR_BAD_SOURCE_IP;
         }
     }
 
@@ -524,9 +513,9 @@ class wpi_payfast extends wpi_gateway_base
     {
 
           pflog( 'Check status and update order' );
-      
+
           /** PayFast Cart. Used for SPC */
-          switch( $pfData['payment_status'] ) 
+          switch( $pfData['payment_status'] )
           {
             case 'PENDING':
               /** Mark invoice as Pending */
@@ -536,7 +525,7 @@ class wpi_payfast extends wpi_gateway_base
             case 'COMPLETE':
               /** Add payment amount */
               $event_note = sprintf(__('%s paid via PayFast', WPI), WPI_Functions::currency_format(abs($pfData['amount_gross']), $pfData['m_payment_id']));
-              
+
               $event_amount = (float)$pfData['amount_gross'];
               $event_type   = 'add_payment';
               /** Log balance changes */
