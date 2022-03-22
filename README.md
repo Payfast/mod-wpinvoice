@@ -38,6 +38,6 @@ In order to make the module “LIVE”, follow the instructions below:
 
     Please see the URL below for all information concerning this module:
 
-    https://www.payfast.co.za/integration/shopping-carts/wp_invoice
+    https://www.payfast.co.za/integration/shopping-carts/wp-invoice/
 
 ******************************************************************************
